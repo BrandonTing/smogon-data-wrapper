@@ -1,5 +1,6 @@
 # smogon-data-wrapper
-wraps data from smogon/stats and give out utlil functions
+Wraps data from smogon/stats and give out utlil functions for node.
+Will add browser support later.
 
 ### Get latest usage data 
 
