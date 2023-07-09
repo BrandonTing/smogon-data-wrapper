@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "",
   "main": "src/index.js",
-  "type": "module",
   "scripts": {
     "test": "echo test"
   },
@@ -11,10 +10,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@changesets/cli": "^2.26.2",
-    "jsdoc": "^4.0.2"
+    "@changesets/cli": "^2.26.2"
   },
   "dependencies": {
-    "axios": "^1.4.0"
+    "jsdoc": "^4.0.2"
   }
 }
