@@ -51,11 +51,6 @@ class smogonDataAnalyzer {
     /**
      * Check if user actually init the analyzer before doing every analyze.
      * @date 2023/7/19 - 下午11:06:24
-     */
-
-    /**
-     * Description placeholder
-     * @date 2023/7/19 - 下午11:45:50
      *
      * @param {smogonRawData} [rawData]
      * @returns {rawData is smogonRawData}
@@ -66,7 +61,6 @@ class smogonDataAnalyzer {
         }
         return true
     }
-
 
     /**
      * Standalone init function to load data locally or fetch from smogon asynchronously;
@@ -118,12 +112,69 @@ class smogonDataAnalyzer {
     }
 
 
-    getUsageOfPokemon() {
-
+    /**
+     * Check if user actually init the analyzer before doing every analyze.
+     * @date 2023/7/19 - 下午11:06:24
+     *
+     * @param {smogonRawData} [rawData]
+     * @param {string} pokemonName
+     * @returns {pokemonName is keyof smogonRawData}
+     */
+    #checkPokemonExist(rawData, pokemonName) {
+        const pokemonSpecificData = rawData?.[pokemonName]
+        if (!pokemonSpecificData) {
+            throw new Error('The pokemon name provided is invalid. If the pokemon is a region variation, please specify the region, ex. Moltres-Galar')
+        }
+        return true
     }
 
-    getCommonEVsOfPokemon() {
+    /**
+     * Provide the usage rate of certain pokemon 
+     * @date 2023/7/20 - 下午5:25:12
+     *
+     * @param {string} pokemonName
+     * @returns {number} usage rate of certain pokemon 
+     */
+    getUsageOfPokemon(pokemonName) {
+        if (!this.#checkRawDataExist(this.rawData)
+            || !this.#checkPokemonExist(this.rawData, pokemonName)) return 0;
+        return this.rawData[pokemonName].usage
+    }
 
+    /**
+     * Provide the top common EV spreads of certain pokemon. Useful when modifying own spread.  
+     * @date 2023/7/20 - 下午5:37:15
+     *
+     * @param {string} pokemonName
+     * @param {number} [size]
+     * @param {boolean} [withNumber=true]
+     * @returns {(string | smogonUsageObjectStructure)[]} commonEVList
+     */
+    getCommonEVsOfPokemon(pokemonName, size = 5, withNumber = true) {
+        if (!this.#checkRawDataExist(this.rawData)
+            || !this.#checkPokemonExist(this.rawData, pokemonName)) return {};
+        const spreadEntries = Object.entries(this.rawData[pokemonName].Spreads)
+            .filter(function ([_, usage]) {
+                return usage > 0
+            })
+        const usageSum = spreadEntries.map(function ([_, usage]) {
+            return usage
+        }).reduce(function (pre, cur) {
+            return pre + cur
+        }, 0)
+        return spreadEntries
+            .sort(function (spreadUsageA, spreadUsageB) {
+                return spreadUsageB[1] - spreadUsageA[1]
+            })
+            .slice(0, size)
+            .map(function (spreadEntry) {
+                if (withNumber) {
+                    return {
+                        [spreadEntry[0]]: spreadEntry[1] / usageSum
+                    }
+                }
+                return spreadEntry[0]
+            })
     }
 
     getCommonItemsOfPokemon() {
@@ -152,10 +203,7 @@ class smogonDataAnalyzer {
         period: '2023-06'
     });
     await tester.init();
-    console.log(tester.period)
-    console.log(tester.rawData)
-    const topUsage = tester.getTopUsagePokemons()
-    console.log(topUsage)
+    console.log(tester.getCommonEVsOfPokemon('Flutter Mane'))
 })()
 
 
