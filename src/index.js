@@ -129,6 +129,44 @@ class smogonDataAnalyzer {
     }
 
     /**
+     * Description placeholder
+     * @date 2023/7/21 - 下午3:52:04
+     *
+     * @param {string} pokemonName
+     * @param {smogonUsageObjectStructure} rawDataOfProperty
+     * @param {number} size
+     * @param {boolean} withNumber
+     * @returns  {(string | smogonUsageObjectStructure)[]} commonItemList
+     */
+    #getTopUsageOfCertainProperty(pokemonName, rawDataOfProperty, size, withNumber) {
+        if (!this.#checkRawDataExist(this.rawData)
+            || !this.#checkPokemonExist(this.rawData, pokemonName)) return [];
+        const entries = Object.entries(rawDataOfProperty)
+            .filter(function ([, usage]) {
+                return usage > 0
+            })
+
+        const usageSum = entries.map(function ([, usage]) {
+            return usage
+        }).reduce(function (pre, cur) {
+            return pre + cur
+        }, 0)
+
+        return entries
+            .sort(function (usageA, usageB) {
+                return usageB[1] - usageA[1]
+            })
+            .slice(0, size)
+            .map(function (entry) {
+                if (withNumber) {
+                    return {
+                        [entry[0]]: entry[1] / usageSum
+                    }
+                }
+                return entry[0]
+            })
+    }
+    /**
      * Provide the usage rate of certain pokemon 
      * @date 2023/7/20 - 下午5:25:12
      *
@@ -150,35 +188,22 @@ class smogonDataAnalyzer {
      * @param {boolean} [withNumber=true]
      * @returns {(string | smogonUsageObjectStructure)[]} commonEVList
      */
-    getCommonEVsOfPokemon(pokemonName, size = 5, withNumber = true) {
-        if (!this.#checkRawDataExist(this.rawData)
-            || !this.#checkPokemonExist(this.rawData, pokemonName)) return {};
-        const spreadEntries = Object.entries(this.rawData[pokemonName].Spreads)
-            .filter(function ([_, usage]) {
-                return usage > 0
-            })
-        const usageSum = spreadEntries.map(function ([_, usage]) {
-            return usage
-        }).reduce(function (pre, cur) {
-            return pre + cur
-        }, 0)
-        return spreadEntries
-            .sort(function (spreadUsageA, spreadUsageB) {
-                return spreadUsageB[1] - spreadUsageA[1]
-            })
-            .slice(0, size)
-            .map(function (spreadEntry) {
-                if (withNumber) {
-                    return {
-                        [spreadEntry[0]]: spreadEntry[1] / usageSum
-                    }
-                }
-                return spreadEntry[0]
-            })
+    getCommonSpreadsOfPokemon(pokemonName, size = 5, withNumber = true) {
+        return this.#getTopUsageOfCertainProperty(pokemonName, this.rawData[pokemonName].Spreads, size, withNumber)
     }
 
-    getCommonItemsOfPokemon() {
+    /**
+     * Provide the top common item choices of certain pokemon.  
+     * @date 2023/7/21 - 下午3:44:48
+     *
+     * @param {string} pokemonName
+     * @param {number} [size]
+     * @param {boolean} [withNumber=true]
+     * @returns {(string | smogonUsageObjectStructure)[]} commonItemList
+     */
 
+    getCommonItemsOfPokemon(pokemonName, size = 5, withNumber = true) {
+        return this.#getTopUsageOfCertainProperty(pokemonName, this.rawData[pokemonName].Items, size, withNumber)
     }
 
     getCommonMovesOfPokemon() {
@@ -195,7 +220,7 @@ class smogonDataAnalyzer {
 
 }
 
-// test code 
+// FIXME test code 
 (async function () {
     const tester = new smogonDataAnalyzer({
         format: 'gen9vgc2023regulationd',
@@ -203,7 +228,7 @@ class smogonDataAnalyzer {
         period: '2023-06'
     });
     await tester.init();
-    console.log(tester.getCommonEVsOfPokemon('Flutter Mane'))
+    console.log(tester.getCommonSpreadsOfPokemon('Flutter Mane'))
 })()
 
 
