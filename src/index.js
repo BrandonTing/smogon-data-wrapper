@@ -1,6 +1,6 @@
 
 /**
- * Description placeholder
+ * Typeof Data from smogon chaos folder
  * @date 2023/7/19 - 下午11:13:00
  * @typedef {Object<string, number>} smogonUsageObjectStructure 
  * @typedef {Object<string, { Moves: smogonUsageObjectStructure, Abilities: smogonUsageObjectStructure, Teammates: smogonUsageObjectStructure, usage: number, Items: smogonUsageObjectStructure, Spreads: smogonUsageObjectStructure }>} smogonRawData
@@ -116,12 +116,12 @@ class smogonDataAnalyzer {
      * Check if user actually init the analyzer before doing every analyze.
      * @date 2023/7/19 - 下午11:06:24
      *
-     * @param {smogonRawData} [rawData]
+     * @param {smogonRawData} rawData
      * @param {string} pokemonName
      * @returns {pokemonName is keyof smogonRawData}
      */
     #checkPokemonExist(rawData, pokemonName) {
-        const pokemonSpecificData = rawData?.[pokemonName]
+        const pokemonSpecificData = rawData[pokemonName]
         if (!pokemonSpecificData) {
             throw new Error('The pokemon name provided is invalid. If the pokemon is a region variation, please specify the region, ex. Moltres-Galar')
         }
@@ -133,14 +133,15 @@ class smogonDataAnalyzer {
      * @date 2023/7/21 - 下午3:52:04
      *
      * @param {string} pokemonName
-     * @param {smogonUsageObjectStructure} rawDataOfProperty
+     * @param {keyof smogonRawData[string]} propertyName
      * @param {number} size
      * @param {boolean} withNumber
      * @returns  {(string | smogonUsageObjectStructure)[]} commonItemList
      */
-    #getTopUsageOfCertainProperty(pokemonName, rawDataOfProperty, size, withNumber) {
-        if (!this.#checkRawDataExist(this.rawData)
-            || !this.#checkPokemonExist(this.rawData, pokemonName)) return [];
+    #getTopUsageOfCertainProperty(pokemonName, propertyName, size, withNumber) {
+        if (!this.#checkRawDataExist(this.rawData)) return [];
+        if (!this.#checkPokemonExist(this.rawData, pokemonName)) return [];
+        const rawDataOfProperty = this.rawData[pokemonName][propertyName]
         const entries = Object.entries(rawDataOfProperty)
             .filter(function ([, usage]) {
                 return usage > 0
@@ -174,8 +175,8 @@ class smogonDataAnalyzer {
      * @returns {number} usage rate of certain pokemon 
      */
     getUsageOfPokemon(pokemonName) {
-        if (!this.#checkRawDataExist(this.rawData)
-            || !this.#checkPokemonExist(this.rawData, pokemonName)) return 0;
+        if (!this.#checkRawDataExist(this.rawData)) return 0;
+        if (!this.#checkPokemonExist(this.rawData, pokemonName)) return 0;
         return this.rawData[pokemonName].usage
     }
 
@@ -189,7 +190,7 @@ class smogonDataAnalyzer {
      * @returns {(string | smogonUsageObjectStructure)[]} commonEVList
      */
     getCommonSpreadsOfPokemon(pokemonName, size = 5, withNumber = true) {
-        return this.#getTopUsageOfCertainProperty(pokemonName, this.rawData[pokemonName].Spreads, size, withNumber)
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Spreads', size, withNumber)
     }
 
     /**
@@ -203,7 +204,7 @@ class smogonDataAnalyzer {
      */
 
     getCommonItemsOfPokemon(pokemonName, size = 5, withNumber = true) {
-        return this.#getTopUsageOfCertainProperty(pokemonName, this.rawData[pokemonName].Items, size, withNumber)
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Items', size, withNumber)
     }
 
     getCommonMovesOfPokemon() {
