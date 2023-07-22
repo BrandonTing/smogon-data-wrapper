@@ -6,6 +6,7 @@
  * @typedef {Object<string, { Moves: smogonUsageObjectStructure, Abilities: smogonUsageObjectStructure, Teammates: smogonUsageObjectStructure, usage: number, Items: smogonUsageObjectStructure, Spreads: smogonUsageObjectStructure }>} smogonRawData
  */
 
+
 /**
  * Accepts format, rating, and period to target specific JSON for analyzing.
  * @date 2023/7/19 - 下午10:52:08
@@ -13,6 +14,7 @@
  * @class smogonDataAnalyzer
  * @classdesc Core class that provides methods for cleaner information of chaos data from smogon
  */
+
 class smogonDataAnalyzer {
 
     /**
@@ -91,23 +93,23 @@ class smogonDataAnalyzer {
      *
      * @param {number} [size=30]
      * @param {boolean} [withNumber=true]
-     * @returns {(string | smogonUsageObjectStructure)[]} topUsageList
+     * @returns {string[] | smogonUsageObjectStructure[]} topUsageList
      */
     getTopUsagePokemons(size = 30, withNumber = true) {
         if (!this.#checkRawDataExist(this.rawData)) return [];
-        return Object.entries(this.rawData)
+        const slicedEntry = Object.entries(this.rawData)
             .sort(function (monA, monB) {
                 return monB[1].usage - monA[1].usage
             })
             .slice(0, size)
-            .map(function (monEntry) {
-                if (withNumber) {
-                    return {
-                        [monEntry[0]]: monEntry[1].usage
-                    }
-                }
-                return monEntry[0]
-            })
+        if (withNumber) {
+            return slicedEntry.map(function ([name,]) { return name })
+        }
+        return slicedEntry.map(function (monEntry) {
+            return {
+                [monEntry[0]]: monEntry[1].usage
+            }
+        })
 
     }
 
@@ -130,42 +132,57 @@ class smogonDataAnalyzer {
 
     /**
      * Description placeholder
-     * @date 2023/7/21 - 下午3:52:04
+     * @date 2023/7/22 - 下午1:24:04
      *
+     * @template {boolean} T
+     * @typedef {T extends true ? smogonUsageObjectStructure[] : string[]} ListOfData
+     */
+
+    /**
+     * Abstraction of smogon data parser
+     * @date 2023/7/21 - 下午3:52:04
+     * @typedef {{ size?: number, withNumber?: boolean }} option
      * @param {string} pokemonName
      * @param {keyof smogonRawData[string]} propertyName
-     * @param {number} size
-     * @param {boolean} withNumber
-     * @returns  {(string | smogonUsageObjectStructure)[]} commonItemList
+     * @param {option} [option]
+     * @returns  { ListOfData<option['withNumber']> }
      */
-    #getTopUsageOfCertainProperty(pokemonName, propertyName, size, withNumber) {
+
+    #getTopUsageOfCertainProperty(pokemonName, propertyName, option) {
         if (!this.#checkRawDataExist(this.rawData)) return [];
         if (!this.#checkPokemonExist(this.rawData, pokemonName)) return [];
         const rawDataOfProperty = this.rawData[pokemonName][propertyName]
+
+        /**
+         * @type {[string, number][]} entries
+         */
         const entries = Object.entries(rawDataOfProperty)
-            .filter(function ([, usage]) {
-                return usage > 0
+            .sort(function (usageA, usageB) {
+                return usageB[1] - usageA[1]
             })
 
+        /**
+         * @type {number} usageSum
+         */
         const usageSum = entries.map(function ([, usage]) {
             return usage
         }).reduce(function (pre, cur) {
             return pre + cur
         }, 0)
 
-        return entries
-            .sort(function (usageA, usageB) {
-                return usageB[1] - usageA[1]
-            })
-            .slice(0, size)
-            .map(function (entry) {
-                if (withNumber) {
+        const sliceOfEntries = option?.size ? entries.slice(0, option.size) : entries
+
+        if (option?.withNumber) {
+            return sliceOfEntries
+                .map(function (entry) {
                     return {
                         [entry[0]]: entry[1] / usageSum
                     }
-                }
-                return entry[0]
-            })
+                })
+        }
+        return sliceOfEntries.map(function ([name,]) {
+            return name
+        })
     }
     /**
      * Provide the usage rate of certain pokemon 
@@ -187,10 +204,10 @@ class smogonDataAnalyzer {
      * @param {string} pokemonName
      * @param {number} [size]
      * @param {boolean} [withNumber=true]
-     * @returns {(string | smogonUsageObjectStructure)[]} commonEVList
+     * @returns {ListOfData<boolean>} commonEVList
      */
     getCommonSpreadsOfPokemon(pokemonName, size = 5, withNumber = true) {
-        return this.#getTopUsageOfCertainProperty(pokemonName, 'Spreads', size, withNumber)
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Spreads', { size, withNumber })
     }
 
     /**
@@ -200,25 +217,63 @@ class smogonDataAnalyzer {
      * @param {string} pokemonName
      * @param {number} [size]
      * @param {boolean} [withNumber=true]
-     * @returns {(string | smogonUsageObjectStructure)[]} commonItemList
+     * @returns {ListOfData<boolean>} commonItemList
      */
 
     getCommonItemsOfPokemon(pokemonName, size = 5, withNumber = true) {
-        return this.#getTopUsageOfCertainProperty(pokemonName, 'Items', size, withNumber)
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Items', { size, withNumber })
+    }
+    /**
+    * Provide information on which ability players use the most.  
+    * @date 2023/7/21 - 下午3:44:48
+    *
+    * @param {string} pokemonName
+    * @param {boolean} [withNumber=true]
+    * @returns {ListOfData<boolean>} abilityList
+    */
+    getAbilityUsageOfPokemon(pokemonName, withNumber = true) {
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Abilities', { withNumber })
     }
 
-    getCommonMovesOfPokemon() {
-
+    /**
+    * Provide the top common move choices of certain pokemon.  
+    * @date 2023/7/21 - 下午3:44:48
+    *
+    * @param {string} pokemonName
+    * @param {number} [size]
+    * @param {boolean} [withNumber=true]
+    * @returns {ListOfData<boolean>} commonMoveList
+    */
+    getCommonMovesOfPokemon(pokemonName, size = 5, withNumber = true) {
+        const unWeighted = this.#getTopUsageOfCertainProperty(pokemonName, 'Moves', { size, withNumber })
+        if (!withNumber) {
+            return unWeighted
+        }
+        return unWeighted
+            .map(function (move) {
+                const [moveName, moveUsage] = Object.entries(move)[0]
+                return {
+                    [moveName]: moveUsage * 4
+                }
+            })
     }
 
-    getAbilityUsageOfPokemon() {
-
+    /**
+     * Get common teammates of pokemon WITHOUT usage. Could nor figure out how smogon parse usage data for now.
+     * @date 2023/7/22 - 下午12:39:15
+     *
+     * @param {string} pokemonName
+     * @param {number} [size=5]
+     * @returns {ListOfData<false>} commonTeammateList
+     */
+    getCommonTeammatesOfPokemon(pokemonName, size = 5) {
+        // FIXME should have a better way to do type guard in jsdoc
+        return this.#getTopUsageOfCertainProperty(pokemonName, 'Teammates', { size, })
+            .map(function (teammate) {
+                if (typeof teammate === 'string') return teammate;
+                return Object.keys(teammate)[0]
+            })
     }
-
-    getCommonTeammatesOfPokemon() {
-
-    }
-
 }
 
 // FIXME test code 
@@ -229,7 +284,7 @@ class smogonDataAnalyzer {
         period: '2023-06'
     });
     await tester.init();
-    console.log(tester.getCommonSpreadsOfPokemon('Flutter Mane'))
+    console.log(tester.getCommonTeammatesOfPokemon('Tornadus'))
 })()
 
 
