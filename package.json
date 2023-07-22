@@ -1,20 +1,24 @@
 {
   "name": "smogon-data-wrapper",
-  "version": "0.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "index.d.ts",
+  "version": "0.0.2",
+  "description": "A data wrapper for competitve pokemon data from smogon chaos file",
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "lint": "tsc"
+    "dev": "node src/index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Brandon Ting",
   "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
-    "tsup": "^7.1.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "jsdoc": "^4.0.2",
+    "prettier": "^3.0.0",
     "typescript": "^5.1.6"
-  }
+  },
+  "dependencies": {}
 }
