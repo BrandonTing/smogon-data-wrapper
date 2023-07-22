@@ -1,5 +1,7 @@
 
 const { smogonDataAnalyzer } = require('./src/index');
+// const { smogonDataAnalyzer } = require('smogon-data-wrapper');
+
 // FIXME test code 
 (async function () {
     const tester = new smogonDataAnalyzer({

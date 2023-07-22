@@ -1,6 +1,6 @@
 {
   "name": "smogon-data-wrapper",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "A data wrapper for competitve pokemon data from smogon chaos file",
   "main": "src/index.js",
   "files": [
@@ -19,5 +19,6 @@
     "jsdoc": "^4.0.2",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6"
-  }
+  },
+  "dependencies": {}
 }
