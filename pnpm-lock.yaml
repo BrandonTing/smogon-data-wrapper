@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  smogon-data-wrapper:
-    specifier: ^0.0.2
-    version: 0.0.2
-
 devDependencies:
   '@changesets/cli':
     specifier: ^2.26.2
@@ -2092,10 +2087,6 @@ packages:
       wcwidth: 1.0.1
       yargs: 15.4.1
     dev: true
-
-  /smogon-data-wrapper@0.0.2:
-    resolution: {integrity: sha512-o5RWifqkxP3uI0Chqx8DpszZwdDloUFyfECUXvymq45nGBjDReZkJzaidvQ/nvp+bi8AQJ4moWo1+jof7nxxZA==}
-    dev: false
 
   /spawndamnit@2.0.0:
     resolution: {integrity: sha512-j4JKEcncSjFlqIwU5L/rp2N5SIPsdxaRsIv678+TZxZ0SRDJTm8JrxJMjE/XuiEZNEir3S8l0Fa3Ke339WI4qA==}
