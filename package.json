@@ -1,7 +1,7 @@
 {
-  "name": "smogon-data-wrapper",
+  "name": "vgc-data-wrapper",
   "version": "0.0.4",
-  "description": "A data wrapper for competitve pokemon data from smogon chaos file",
+  "description": "A data wrapper for competitve pokemon data",
   "main": "src/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -17,6 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
+    "@types/bun": "^1.0.3",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "jsdoc": "^4.0.2",
